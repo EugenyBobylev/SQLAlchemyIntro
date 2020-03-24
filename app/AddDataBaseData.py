@@ -1,6 +1,6 @@
 from sqlalchemy.orm import sessionmaker
-
 from app.db import engine, Cookie
+
 
 Session = sessionmaker(bind=engine)
 session = Session()
