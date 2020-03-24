@@ -1,4 +1,5 @@
 import unittest
+from datetime import datetime, timezone
 from typing import List
 
 from app.db import dal, Doctor, IncartJob, JobDoctor, prep_db
@@ -60,6 +61,44 @@ class MyTestCase(unittest.TestCase):
         self.assertIsNotNone(job_doctors)
         self.assertTrue(isinstance(job_doctors, List))
         self.assertTrue(len(job_doctors), 2)
+
+    def test_create_doctor(self):
+        doctor = Doctor(name='Филатов')
+        dal.session.add(doctor)
+        dal.session.commit()
+
+        self.assertTrue(doctor.id, 3)
+
+    def test_create_job(self):
+        job: IncartJob = IncartJob(snipet="тестовое задание")
+        dal.session.add(job)
+        dal.session.commit()
+
+        self.assertTrue(job.id, 3)
+
+    def test_create_jobdoctor(self):
+        doctor: Doctor = Doctor(name='Гипократ')
+        dal.session.add(doctor)
+        job: IncartJob = IncartJob(snipet='для доктора')
+        dal.session.add(job)
+
+        job_doctor = JobDoctor()
+        job_doctor.doctor = doctor
+        job_doctor.job = job
+        dal.session.add(job_doctor)
+        dal.session.commit()  # insert
+
+        job_doctor.request_id = '12345'
+        now = datetime.now().astimezone(timezone.utc)
+        job_doctor.request_sended = now
+        dal.session.add(job_doctor)
+        dal.session.commit()  # update
+
+        self.assertIsNotNone(doctor.id)
+        self.assertIsNotNone(job.id)
+        self.assertIsNotNone(job_doctor.doctor_id)
+        self.assertIsNotNone(job_doctor.job_id)
+        self.assertEqual(doctor, job_doctor.doctor)
 
 
 if __name__ == '__main__':

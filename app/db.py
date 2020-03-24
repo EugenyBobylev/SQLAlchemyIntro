@@ -1,5 +1,4 @@
-from _datetime import datetime
-
+from datetime import datetime, timezone
 
 from sqlalchemy import create_engine, Column, Integer, String, Numeric, DateTime, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
@@ -57,7 +56,7 @@ class IncartJob(Base):
     __tablename__ = 'jobs'
     id = Column(Integer, primary_key=True)
     snipet = Column(String(255))
-    created = Column(DateTime, default=datetime.now)
+    created = Column(DateTime, default=datetime.now().astimezone(timezone.utc))
     jobdoctor = relationship("JobDoctor")
 
 
@@ -65,6 +64,9 @@ class JobDoctor(Base):
     __tablename__ = 'jobsdoctors'
     job_id = Column(Integer, ForeignKey('jobs.id'), primary_key=True)
     doctor_id = Column(Integer, ForeignKey('doctors.id'), primary_key=True)
+    request_id = Column(String(16))
+    request_sended = Column(DateTime)
+
     doctor = relationship("Doctor", back_populates='jobdoctor')
     job = relationship("IncartJob", back_populates ='jobdoctor')
 
