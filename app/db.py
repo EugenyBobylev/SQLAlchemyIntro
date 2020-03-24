@@ -82,10 +82,13 @@ def prep_db(session: session.Session):
     session.bulk_save_objects([job1, job2])
     session.commit()
 
-    job_doctor = JobDoctor(job_id=1, doctor_id=1)
+    job_doctor: JobDoctor = JobDoctor(job_id=1, doctor_id=1)
+    job_doctor.request_id = '1'
     session.add(job_doctor)
     session.commit()
 
     job_doctor2 = JobDoctor(job_id=1, doctor_id=2)
+    job_doctor2.request_id = '2'
+    job_doctor2.request_sended = datetime.utcnow()
     session.add(job_doctor2)
     session.commit()

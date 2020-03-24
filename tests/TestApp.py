@@ -52,7 +52,7 @@ class MyTestCase(unittest.TestCase):
         self.assertTrue(isinstance(job_doctor.job, IncartJob))
         self.assertTrue(isinstance(job_doctor.doctor, Doctor))
 
-    def test_job1_relation(self):
+    def test_job_relation(self):
         job: IncartJob = dal.session.query(IncartJob).filter(IncartJob.id == 1).first()
         job_doctors = job.jobdoctor
 
@@ -62,19 +62,14 @@ class MyTestCase(unittest.TestCase):
         self.assertTrue(isinstance(job_doctors, List))
         self.assertTrue(len(job_doctors), 2)
 
-    def test_create_doctor(self):
-        doctor = Doctor(name='Филатов')
-        dal.session.add(doctor)
-        dal.session.commit()
+    def test_job_find_jobdoctor(self):
+        job = dal.session.query(IncartJob).filter(IncartJob.id == 1).first()
+        results = [i for i in job.jobdoctor if i.request_sended is not None]
+        job_doctor: JobDoctor = results[-1]
 
-        self.assertTrue(doctor.id, 3)
-
-    def test_create_job(self):
-        job: IncartJob = IncartJob(snipet="тестовое задание")
-        dal.session.add(job)
-        dal.session.commit()
-
-        self.assertTrue(job.id, 3)
+        self.assertIsNotNone(job)
+        self.assertTrue(len(job.jobdoctor),2)
+        self.assertIsNotNone(job_doctor)
 
     def test_create_jobdoctor(self):
         doctor: Doctor = Doctor(name='Гипократ')
