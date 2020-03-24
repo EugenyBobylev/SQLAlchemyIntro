@@ -1,14 +1,28 @@
 from _datetime import datetime
 
+
 from sqlalchemy import create_engine, Column, Integer, String, Numeric, DateTime, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.orm import sessionmaker, relationship, session
 
 from config import Config
 
-db_uri = Config.SQLALCHEMY_DATABASE_URI;
-engine = create_engine(db_uri)
 Base = declarative_base()
+
+
+class DataAccessLayer():
+    def __init__(self):
+        self.engine = None
+        self.session: session.Session = None
+        self.conn_string = Config.SQLALCHEMY_DATABASE_URI
+
+    def connect(self):
+        self.engine = create_engine(self.conn_string)
+        Base.metadata.create_all(self.engine)
+        self.Session = sessionmaker(bind=self.engine)
+
+
+dal = DataAccessLayer()
 
 
 class Cookie(Base):
@@ -46,9 +60,30 @@ class IncartJob(Base):
     created = Column(DateTime, default=datetime.now)
     jobdoctor = relationship("JobDoctor")
 
+
 class JobDoctor(Base):
     __tablename__ = 'jobsdoctors'
     job_id = Column(Integer, ForeignKey('jobs.id'), primary_key=True)
     doctor_id = Column(Integer, ForeignKey('doctors.id'), primary_key=True)
     doctor = relationship("Doctor", back_populates='jobdoctor')
     job = relationship("IncartJob", back_populates ='jobdoctor')
+
+
+def prep_db(session: session.Session):
+    doctor1 = Doctor(name='Айболит')
+    doctor2 = Doctor(name='Сеченов')
+    session.bulk_save_objects([doctor1, doctor2])
+    session.commit()
+
+    job1 = IncartJob(snipet='job_1')
+    job2 = IncartJob(snipet='job_2')
+    session.bulk_save_objects([job1, job2])
+    session.commit()
+
+    job_doctor = JobDoctor(job_id=1, doctor_id=1)
+    session.add(job_doctor)
+    session.commit()
+
+    job_doctor2 = JobDoctor(job_id=1, doctor_id=2)
+    session.add(job_doctor2)
+    session.commit()
